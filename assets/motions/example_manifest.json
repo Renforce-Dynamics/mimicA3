@@ -1,0 +1,6 @@
+{
+  "name": "locomotion",
+  "root": "assets/motions/locomotion",
+  "sampling": "duration",
+  "files": ["walk_001.npz", "run_001.npz"]
+}

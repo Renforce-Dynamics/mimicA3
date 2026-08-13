@@ -1,0 +1,27 @@
+schema_id: mimica3.tracking.v1
+control_dt: 0.02
+num_envs: 8192
+episode_steps: 1000
+future_steps: [0, 1, 2, 4]
+history_steps: [0, 1, 2, 3, 4, 8, 16]
+reset_phase: uniform
+
+# Weights choose datasets first; clip sampling happens within each dataset.
+datasets:
+  fullcover:
+    root: src/mimica3/assets/motions/fullcover/reference_bank_fullcover_v0_2.npz
+    weight: 1.0
+    sampling: uniform
+    shard_across_ranks: true
+
+algorithm:
+  implementation: beyondamp
+  name: ppo
+  actor_hidden_dims: [512, 512, 256]
+  critic_hidden_dims: [512, 512, 256]
+  rollout_steps: 24
+  learning_epochs: 5
+  minibatches: 8
+  learning_rate: 0.0003
+  distributed_backend: nccl
+  environments_per_rank: 4096

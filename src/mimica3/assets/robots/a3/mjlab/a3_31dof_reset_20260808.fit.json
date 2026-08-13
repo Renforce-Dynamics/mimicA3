@@ -1,0 +1,423 @@
+{
+  "excludes": [
+    [
+      "pelvis_link",
+      "left_hip_roll_Link"
+    ],
+    [
+      "pelvis_link",
+      "right_hip_roll_Link"
+    ],
+    [
+      "left_elbow_Link",
+      "left_wrist_pitch_Link"
+    ],
+    [
+      "right_elbow_Link",
+      "right_wrist_pitch_Link"
+    ],
+    [
+      "left_hip_pitch_Link",
+      "left_hip_yaw_Link"
+    ],
+    [
+      "right_hip_pitch_Link",
+      "right_hip_yaw_Link"
+    ],
+    [
+      "torso_Link",
+      "left_shoulder_roll_Link"
+    ],
+    [
+      "torso_Link",
+      "right_shoulder_roll_Link"
+    ],
+    [
+      "torso_Link",
+      "head_pitch_Link"
+    ],
+    [
+      "left_wrist_roll_Link",
+      "left_wrist_yaw_Link"
+    ],
+    [
+      "right_wrist_roll_Link",
+      "right_wrist_yaw_Link"
+    ],
+    [
+      "pelvis_link",
+      "torso_Link"
+    ],
+    [
+      "left_knee_Link",
+      "left_ankle_roll_Link"
+    ],
+    [
+      "right_knee_Link",
+      "right_ankle_roll_Link"
+    ]
+  ],
+  "fits": {
+    "head_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.015 0 0.03",
+          "size": "0.075 0.065 0.08",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "head_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 0.11 0 0 0.18",
+          "size": "0.045",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_ankle_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "-0.020 0 0 0.025 0 0",
+          "size": "0.008",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_ankle_roll_collision": {
+      "lateral_pitch_m": 0.00875,
+      "radius_m": 0.01,
+      "strategy": "11_longitudinal_capsules"
+    },
+    "left_elbow_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.01 0.105 0 -0.01",
+          "size": "0.035",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_hand_collision": {
+      "primitive_count": 22,
+      "strategy": "22_piece_convex_toss_holder_mesh_exception"
+    },
+    "left_hip_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 0.006 -0.015",
+          "size": "0.050 0.050 0.060",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_hip_roll_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 0 -0.025",
+          "size": "0.055 0.055 0.060",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_hip_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0.005 0 -0.04 0.005 0 -0.28",
+          "size": "0.055",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_knee_collision": {
+      "primitive_count": 2,
+      "primitives": [
+        {
+          "fromto": "0 0 0.02 0 0 -0.20",
+          "size": "0.055",
+          "type": "capsule"
+        },
+        {
+          "fromto": "0 0 -0.20 0 0 -0.38",
+          "name": "left_shin_lower_collision",
+          "size": "0.045",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_shoulder_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 0.040 0",
+          "size": "0.045",
+          "type": "sphere"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_shoulder_roll_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.01 0 0 -0.10",
+          "size": "0.042",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_shoulder_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.02 0 0 -0.12",
+          "size": "0.038",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_wrist_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 0 0.045 0 0",
+          "size": "0.024",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_wrist_roll_collision_0": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.035 -0.015 0",
+          "size": "0.030 0.022 0.030",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_wrist_roll_collision_1": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.035 0.020 0",
+          "size": "0.030 0.020 0.030",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "left_wrist_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.01 0 0",
+          "size": "0.030",
+          "type": "sphere"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "pelvis_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "-0.002 0 -0.13",
+          "size": "0.075 0.082 0.09",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_ankle_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "-0.020 0 0 0.025 0 0",
+          "size": "0.008",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_ankle_roll_collision": {
+      "lateral_pitch_m": 0.00875,
+      "radius_m": 0.01,
+      "strategy": "11_longitudinal_capsules"
+    },
+    "right_elbow_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.01 0.105 0 -0.01",
+          "size": "0.035",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_hip_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 -0.006 -0.015",
+          "size": "0.050 0.050 0.060",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_hip_roll_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 0 -0.025",
+          "size": "0.055 0.055 0.060",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_hip_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0.005 0 -0.04 0.005 0 -0.28",
+          "size": "0.055",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_knee_collision": {
+      "primitive_count": 2,
+      "primitives": [
+        {
+          "fromto": "0 0 0.02 0 0 -0.20",
+          "size": "0.055",
+          "type": "capsule"
+        },
+        {
+          "fromto": "0 0 -0.20 0 0 -0.38",
+          "name": "right_shin_lower_collision",
+          "size": "0.045",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_racket_collision": {
+      "strategy": "preserved_mesh_exception"
+    },
+    "right_shoulder_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0 -0.040 0",
+          "size": "0.045",
+          "type": "sphere"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_shoulder_roll_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.01 0 0 -0.10",
+          "size": "0.042",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_shoulder_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 -0.02 0 0 -0.12",
+          "size": "0.038",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_wrist_pitch_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0 0 0 0.045 0 0",
+          "size": "0.024",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_wrist_roll_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.035 0 0",
+          "size": "0.032 0.030 0.030",
+          "type": "ellipsoid"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "right_wrist_yaw_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "pos": "0.01 0 0",
+          "size": "0.030",
+          "type": "sphere"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    },
+    "torso_collision": {
+      "primitive_count": 1,
+      "primitives": [
+        {
+          "fromto": "0.02 0 0.05 0.02 0 0.28",
+          "size": "0.105",
+          "type": "capsule"
+        }
+      ],
+      "strategy": "g1_style_manual_primitive_fit"
+    }
+  },
+  "foot_collision_condim": 3,
+  "foot_friction": [
+    0.6,
+    0.005,
+    0.0001
+  ],
+  "output": "assets/robots/a3/mjlab/a3_31dof.xml",
+  "self_collision_condim": 1,
+  "solref": [
+    0.025,
+    1.0
+  ],
+  "source": "Coordina-A3-ZY/assets/robots/a3/mjlab/a3_31dof.xml"
+}

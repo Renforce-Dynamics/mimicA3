@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+dist/
+build/
+logs/
+outputs/
+wandb/
+*.onnx
+*.pt
+*.pth
+
+# Motion corpora are local artifacts. Keep only contracts/manifests in git.
+assets/motions/*
+!assets/motions/README.md
+!assets/motions/example_manifest.json
