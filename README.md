@@ -1,22 +1,31 @@
 # MimicA3
 
-面向 AgiBot A3 的独立 multi-motion tracking 训练仓库。工程分层沿用
-AlphaCoordina 的设计，任务思路参考 MimicLite，但不依赖其训练框架、数据工具或 Git
-子模块。
+A self-contained multi-motion tracking training repository for the AgiBot A3 humanoid.
+The task semantics follow MimicLite (weighted datasets, future reference frames,
+reference-near reset, full-body tracking rewards, early termination), but nothing from
+MimicLite is copied or depended on: no training framework, no data tooling, no Git
+submodules.
 
 ```text
-src/mjlab       自维护 MuJoCo/MJX 仿真与 manager 框架
+src/mjlab       in-repo MuJoCo/MJX simulation and manager framework
       ↓
-src/beyondamp   自维护 PPO、模型、runner 与 MJLab adapter
+src/beyondamp   in-repo PPO, models, runner, and MJLab adapter
       ↓
-src/mimica3     A3 ABI、motion 数据、multi-motion sampling 与 tracking task
+src/mimica3     A3 ABI, motion data, multi-motion sampling, and the tracking task
 ```
 
-目前已具备可训练闭环：A3 29-DoF action ABI、FullCover motion bank、rank-aware
-multi-motion sampling、reference-state reset、80 ms lookahead、全身 tracking rewards、
-BeyondAMP PPO，以及随 wheel 发布的 A3 MJCF/mesh 和首批数据。
+The training loop is already closed: 29-DoF A3 action ABI, FullCover motion bank,
+rank-aware multi-motion sampling, reference-state reset, 80 ms lookahead, full-body
+tracking rewards, BeyondAMP PPO, and the A3 MJCF/mesh assets plus the first dataset
+shipped with the wheel.
 
-## 安装与验证
+On top of that, the repo provides a feasible randomization scheme for A3: resets sample
+a random active phase from the reference and perturb the physics state around it,
+dataset and clip sampling are weighted and fully explicit, and multi-GPU runs shard
+references into disjoint subsets per rank — all configurable from the task config
+without touching simulation code.
+
+## Installation and verification
 
 ```bash
 uv sync --extra dev
@@ -25,17 +34,17 @@ uv run ruff check src/mimica3 tests
 python scripts/check_independence.py
 ```
 
-需要仿真训练时再安装重依赖：
+Install the heavy dependencies only when you need simulation training:
 
 ```bash
 uv sync --extra train --extra dev
 ```
 
-这样 motion 数据检查和采样工具无需安装 MuJoCo、Warp 或 PyTorch。
+This keeps motion-data checks and sampling tools free of MuJoCo, Warp, and PyTorch.
 
-## 训练
+## Training
 
-单卡 smoke：
+Single-GPU smoke run:
 
 ```bash
 uv run train-mimica3 MimicA3-MultiMotion-Tracking-v1 \
@@ -44,7 +53,7 @@ uv run train-mimica3 MimicA3-MultiMotion-Tracking-v1 \
   --agent.max-iterations 10
 ```
 
-四卡正式训练：
+Four-GPU full training:
 
 ```bash
 scripts/train_multigpu.sh 0,1,2,3 \
@@ -52,24 +61,29 @@ scripts/train_multigpu.sh 0,1,2,3 \
   --agent.max-iterations 4000
 ```
 
-`num_envs` 是每个 rank 的环境数量。四卡默认合计 16384 environments。每个 rank
-按 `global_reference_id % WORLD_SIZE == RANK` 加载互斥 FullCover 子集；PPO 参数与梯度通过
-NCCL 广播和 all-reduce 同步。若显存不足，先降到每卡 2048。
+`num_envs` is the per-rank environment count, so four GPUs give 16384 environments by
+default. Each rank loads a disjoint FullCover shard via
+`global_reference_id % WORLD_SIZE == RANK`; PPO parameters and gradients are
+synchronized through NCCL broadcast and all-reduce. If you run out of VRAM, drop to
+2048 envs per GPU first.
 
-## 设计原则
+## Design principles
 
-- MimicLite 仅作为 task semantics 参考：weighted datasets、future reference、reference-near
-  reset、全身 tracking reward 与 early termination。
-- motion 转换是离线过程；训练只读取本仓库格式，不 import retargeting 工具。
-- `mjlab`、`beyondamp` 都在本仓库维护，禁止 path/git dependency 和兄弟仓库 import。
-- dataset 权重与 clip 权重分开，避免数据量大的 corpus 无意间吞掉训练分布。
-- actor 使用 372-D H4 proprio 与 417-D reference observation；critic 额外使用 4-D
-  privileged state。
+- MimicLite is a task-semantics reference only: weighted datasets, future reference,
+  reference-near reset, full-body tracking reward, and early termination.
+- Motion conversion is an offline process; training reads only this repo's format and
+  never imports retargeting tools.
+- `mjlab` and `beyondamp` are maintained in this repo; path/git dependencies and
+  sibling-repo imports are forbidden.
+- Dataset weights are configured separately from clip weights, so a large corpus cannot
+  silently swallow the training distribution.
+- The actor consumes 372-D H4 proprioception and 417-D reference observations; the
+  critic adds a 4-D privileged state.
 
-详见 [架构说明](docs/ARCHITECTURE.md) 与 [motion 格式](docs/MOTION_FORMAT.md)。
+See [the architecture notes](docs/ARCHITECTURE.md) and
+[the motion format spec](docs/MOTION_FORMAT.md) for details.
 
-## 来源与许可
+## Licensing
 
-仓库内 `mjlab`/`beyondamp` 基线与 A3 资产来自原有 AlphaCoordina 工程；第三方许可见
-`THIRD_PARTY_NOTICES.md` 和 `licenses/`。MimicLite 的实现没有复制进本仓库，也不是运行时
-依赖。
+Third-party licenses are listed in `THIRD_PARTY_NOTICES.md` and `licenses/`. MimicLite
+code is not copied into this repository and is not a runtime dependency.
