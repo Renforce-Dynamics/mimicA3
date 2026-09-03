@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mujoco model="Agibot_A3_31dof_MJLab_Reset_20260808">
-  <!-- Reset collision asset generated from a3_31dof.xml; dynamics are unchanged and the left hand uses the toss-holder visual. -->
-  <compiler angle="radian" meshdir="../source_mujoco/meshes" autolimits="true" inertiafromgeom="false" />
+<mujoco model="Agibot A3 (MJLab)">
+  <!-- MJLab variant of the vendor A3 model: collision geometry rebuilt as capsule-dominant primitives, dynamics unchanged, left hand uses the toss-holder visual. -->
+  <compiler angle="radian" meshdir="../vendor/meshes" autolimits="true" inertiafromgeom="false" />
   <default>
     <geom contype="0" conaffinity="0" friction="1.5 0.005 0.0001" />
     <default class="collision">

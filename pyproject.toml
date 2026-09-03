@@ -59,6 +59,7 @@ mimica3 = [
   "assets/**/*.npz",
   "assets/**/*.csv",
   "assets/**/LICENSE",
+  "assets/**/README.md",
 ]
 
 [tool.pytest.ini_options]

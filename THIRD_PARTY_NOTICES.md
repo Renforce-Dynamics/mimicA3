@@ -20,9 +20,12 @@ the target architecture. No runtime import from another repository is used.
 ## AgiBot A3 Assets and Motion Data
 
 The AgiBot A3 MuJoCo model, meshes and retargeted motion data were taken from
-the user-provided A3 training repository for this robot replacement. The asset
-license supplied with that repository is preserved at
-`src/mimica3/assets/robots/a3/source_mujoco/LICENSE`.
+the user-provided A3 training repository for this robot replacement. They are
+licensed under the Mulan Permissive Software License v2 (Mulan PSL v2); the license
+text is preserved at `src/mimica3/assets/robots/a3/vendor/LICENSE`, and
+`src/mimica3/assets/robots/a3/README.md` documents provenance, our modifications
+(capsule-dominant collision geometry, fitted joint dynamics), and the usage
+restrictions that come with the license.
 
 The packaged FullCover v0.2 bank is the retargeted 146-reference artifact from
 AlphaCoordina and retains its source metadata inside `metadata_json`; its original

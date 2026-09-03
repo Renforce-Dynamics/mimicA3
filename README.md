@@ -1,31 +1,40 @@
 # MimicA3
 
-A self-contained multi-motion tracking training repository for the AgiBot A3 humanoid.
-The task semantics follow MimicLite (weighted datasets, future reference frames,
-reference-near reset, full-body tracking rewards, early termination), but nothing from
-MimicLite is copied or depended on: no training framework, no data tooling, no Git
-submodules.
+Whole-body motion tracking for the AgiBot A3 humanoid.
+
+The tracker itself is general-purpose, but the main way we use it is training experts
+for downstream tasks from small motion datasets. You bring a handful of clips for a
+specific skill, mix them into the dataset weights, and train a per-task expert policy.
+The FullCover bank shipped here is the base corpus, not the end goal.
+
+The task design follows MimicLite (weighted datasets, future reference frames,
+reference-near reset, full-body tracking rewards, early termination). None of its code
+is copied, and it is not a dependency.
 
 ```text
-src/mjlab       in-repo MuJoCo/MJX simulation and manager framework
-      ↓
-src/beyondamp   in-repo PPO, models, runner, and MJLab adapter
-      ↓
-src/mimica3     A3 ABI, motion data, multi-motion sampling, and the tracking task
+src/mjlab       MuJoCo/MJX simulation and manager framework
+src/beyondamp   PPO, models, runner, MJLab adapter
+src/mimica3     A3 robot ABI, motion data, sampling, tracking task
 ```
 
-The training loop is already closed: 29-DoF A3 action ABI, FullCover motion bank,
-rank-aware multi-motion sampling, reference-state reset, 80 ms lookahead, full-body
-tracking rewards, BeyondAMP PPO, and the A3 MJCF/mesh assets plus the first dataset
-shipped with the wheel.
+All three layers live in this repo. Dependencies only point downward.
 
-On top of that, the repo provides a feasible randomization scheme for A3: resets sample
-a random active phase from the reference and perturb the physics state around it,
-dataset and clip sampling are weighted and fully explicit, and multi-GPU runs shard
-references into disjoint subsets per rank — all configurable from the task config
-without touching simulation code.
+## The A3 model
 
-## Installation and verification
+The MJCF in `src/mimica3/assets/robots/a3/mjlab/` is our own asset, derived from the
+vendor model. Collision geometry is capsules across most of the body (43 capsules,
+plus ellipsoids/spheres where capsules fit badly, like the pelvis, head, and hands);
+meshes are visual-only. Joint damping, friction loss, and armature come from
+identification data. There are extra collision groups for racket and tossing contacts,
+since those are the downstream tasks we care about. Provenance, the full modification
+list, and license restrictions are documented in
+`src/mimica3/assets/robots/a3/README.md`.
+
+The PD gains in `src/mimica3/mjlab/robot.py` were tuned against the real robot, not
+just in sim. Resets draw a uniform random phase from the reference motion and perturb
+the state around it, so small datasets still produce a reasonable state distribution.
+
+## Install and test
 
 ```bash
 uv sync --extra dev
@@ -34,13 +43,13 @@ uv run ruff check src/mimica3 tests
 python scripts/check_independence.py
 ```
 
-Install the heavy dependencies only when you need simulation training:
+The heavy deps (MuJoCo, Warp, PyTorch) are only needed for training:
 
 ```bash
 uv sync --extra train --extra dev
 ```
 
-This keeps motion-data checks and sampling tools free of MuJoCo, Warp, and PyTorch.
+Motion data checks and sampling tools work without them.
 
 ## Training
 
@@ -53,7 +62,7 @@ uv run train-mimica3 MimicA3-MultiMotion-Tracking-v1 \
   --agent.max-iterations 10
 ```
 
-Four-GPU full training:
+Four GPUs:
 
 ```bash
 scripts/train_multigpu.sh 0,1,2,3 \
@@ -61,29 +70,27 @@ scripts/train_multigpu.sh 0,1,2,3 \
   --agent.max-iterations 4000
 ```
 
-`num_envs` is the per-rank environment count, so four GPUs give 16384 environments by
-default. Each rank loads a disjoint FullCover shard via
-`global_reference_id % WORLD_SIZE == RANK`; PPO parameters and gradients are
-synchronized through NCCL broadcast and all-reduce. If you run out of VRAM, drop to
-2048 envs per GPU first.
+`num_envs` is per rank. Each rank loads a disjoint shard of the reference bank
+(`global_reference_id % WORLD_SIZE == RANK`), and PPO syncs parameters and gradients
+over NCCL. Drop to 2048 envs per GPU if you run out of memory.
 
-## Design principles
+To train an expert on your own clips, convert them to the `mimica3.motion.v1` format
+(offline, see [docs/MOTION_FORMAT.md](docs/MOTION_FORMAT.md)) and add a dataset entry
+with an explicit weight in `configs/a3_multi_motion.yaml`. Dataset weights are
+configured by hand on purpose: a large corpus should not silently swallow a small
+task-specific one.
 
-- MimicLite is a task-semantics reference only: weighted datasets, future reference,
-  reference-near reset, full-body tracking reward, and early termination.
-- Motion conversion is an offline process; training reads only this repo's format and
-  never imports retargeting tools.
-- `mjlab` and `beyondamp` are maintained in this repo; path/git dependencies and
-  sibling-repo imports are forbidden.
-- Dataset weights are configured separately from clip weights, so a large corpus cannot
-  silently swallow the training distribution.
-- The actor consumes 372-D H4 proprioception and 417-D reference observations; the
+## Notes
+
+- Policy actions are 29 DoF in a frozen joint order; the two head joints are not
+  policy actions.
+- The actor sees 372-D proprioceptive history plus 417-D reference observations; the
   critic adds a 4-D privileged state.
+- Control runs at 50 Hz with reference lookahead `[0, 1, 2, 4]` (80 ms).
+- Schema changes (dimensions, timing, frames) get a new version id instead of silent
+  compatibility. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-See [the architecture notes](docs/ARCHITECTURE.md) and
-[the motion format spec](docs/MOTION_FORMAT.md) for details.
+## License
 
-## Licensing
-
-Third-party licenses are listed in `THIRD_PARTY_NOTICES.md` and `licenses/`. MimicLite
-code is not copied into this repository and is not a runtime dependency.
+Third-party licenses are in `THIRD_PARTY_NOTICES.md` and `licenses/`. MimicLite is a
+design reference only, not a runtime dependency.
