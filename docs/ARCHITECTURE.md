@@ -8,7 +8,8 @@
 | `beyondamp` | PPO、storage、model、runner、MJLab adapter | motion corpus 或具体 task 配置 |
 | `mimica3` | A3 robot ABI、data、command、obs、reward、termination、DR | 仓外源码 import |
 
-依赖只能沿表格从上到下。`mimica3.motion` 与 `mimica3.tracking` 是纯 NumPy 层，数据审计和
+依赖方向为 `mimica3 → beyondamp → mjlab`，上层可使用更底层接口。
+`mimica3.motion` 与 `mimica3.tracking` 是纯 NumPy 层，数据审计和
 合同测试不需要启动仿真。
 
 ## 参考 MimicLite、但自行实现的部分
@@ -40,6 +41,9 @@
 - `A3JointPositionAction` 保持 canonical 29-D 顺序，将目标裁剪到物理 joint limit，并只把
   executed normalized action 写回 history。
 - BeyondAMP PPO 支持单卡与 NCCL 多卡；多卡时每个 rank 加载互斥 reference shard。
+- 训练使用单个全身 MLP actor，PPO 保留独立的价值 critic；DR 不改变网络或观测 ABI。
+- DR 提供 `no_dr`、`basic_dr`、`full_dr`、`sonic_dr`、`full_plus_sonic_dr`，默认 basic。
+  参数范围与组合规则见 [DR 配置表](DR_TABLE.md)。
 
 下一阶段是 256-env 单卡 overfit 与 4 卡 FullCover 正式训练曲线；随后加入 phase-aware
 curriculum、更多独立 corpus、window cache 和 sim2sim deployment ABI。

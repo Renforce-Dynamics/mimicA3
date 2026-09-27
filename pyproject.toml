@@ -38,7 +38,7 @@ train = [
 mimic_a3 = "mimica3.mjlab"
 
 [project.scripts]
-train-mimica3 = "beyondamp.integrations.mjlab.train:main"
+train-mimica3 = "mimica3.mjlab.train:main"
 play-mimica3 = "mjlab.scripts.play:main"
 list-mimica3-envs = "mjlab.scripts.list_envs:main"
 

@@ -1,9 +1,12 @@
+# Contract summary, not a runtime YAML loader. Runtime source: mjlab/task.py.
+# Select DR with train-mimica3 TASK --dr-profile PROFILE.
 schema_id: mimica3.tracking.v1
+dr_profile: basic_dr
 control_dt: 0.02
-num_envs: 8192
-episode_steps: 1000
+num_envs: 4096
+episode_steps: 300
 future_steps: [0, 1, 2, 4]
-history_steps: [0, 1, 2, 3, 4, 8, 16]
+history_steps: [0, 1, 2, 3]
 reset_phase: uniform
 
 # Weights choose datasets first; clip sampling happens within each dataset.
@@ -17,6 +20,8 @@ datasets:
 algorithm:
   implementation: beyondamp
   name: ppo
+  actor_model: MLPModel
+  critic_model: MLPModel
   actor_hidden_dims: [512, 512, 256]
   critic_hidden_dims: [512, 512, 256]
   rollout_steps: 24

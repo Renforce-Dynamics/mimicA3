@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from mimica3.randomization import DrProfile, resolve_dr_profile
 from mimica3.robot import A3_ACTION_DIM
 
 
@@ -21,12 +22,14 @@ class MultiMotionTrackingConfig:
     control_dt: float = 0.02
     action_dim: int = A3_ACTION_DIM
     future_steps: tuple[int, ...] = (0, 1, 2, 4)
-    history_steps: tuple[int, ...] = (0, 1, 2, 3, 4, 8, 16)
-    episode_steps: int = 1000
+    history_steps: tuple[int, ...] = (0, 1, 2, 3)
+    episode_steps: int = 300
     reset_phase: str = "uniform"
+    dr_profile: DrProfile = "basic_dr"
     datasets: tuple[DatasetConfig, ...] = field(default_factory=tuple)
 
     def validate(self) -> None:
+        resolve_dr_profile(self.dr_profile)
         if self.action_dim != A3_ACTION_DIM:
             raise ValueError(f"A3 tracking action_dim must be {A3_ACTION_DIM}")
         if self.control_dt <= 0 or self.episode_steps <= 0:

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
+
+import tyro
 
 from beyondamp.integrations.mjlab import (
     BeyondAmpModelCfg,
@@ -12,7 +15,9 @@ from beyondamp.integrations.mjlab import (
 from mimica3.mjlab import mdp
 from mimica3.mjlab.actions import A3JointPositionActionCfg
 from mimica3.mjlab.command import MultiMotionCommandCfg
+from mimica3.mjlab.randomization import randomization_events
 from mimica3.mjlab.robot import A3_ACTION_SCALE, A3_DEFAULT_JOINT_POS, make_a3_robot_cfg
+from mimica3.randomization import DrProfile, RandomizationConfig, resolve_dr_profile
 from mimica3.robot import A3_JOINT_ORDER
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs.mdp import (
@@ -61,6 +66,12 @@ TRACKING_BODIES = (
     "right_wrist_yaw_Link",
 )
 FUTURE_STEPS = (0, 1, 2, 4)
+
+
+@dataclass(kw_only=True)
+class MultiMotionEnvCfg(ManagerBasedRlEnvCfg):
+    # Selected before CLI leaf overrides; persisted with the resolved events.
+    randomization: tyro.conf.Suppress[RandomizationConfig]
 
 
 def _proprio_terms(*, noisy: bool) -> dict[str, ObservationTermCfg]:
@@ -115,9 +126,13 @@ def multi_motion_env_cfg(
     bank_file: str | Path = DEFAULT_FULLCOVER_BANK,
     num_envs: int | None = None,
     shard_across_ranks: bool = False,
+    dr_profile: DrProfile | None = None,
 ) -> ManagerBasedRlEnvCfg:
     """Build the first trainable A3 FullCover tracking environment."""
 
+    dr_cfg = resolve_dr_profile(dr_profile if dr_profile is not None else (
+        "no_dr" if play else "basic_dr"
+    ))
     robot_cfg = make_a3_robot_cfg()
     robot_cfg.init_state.joint_pos = dict(A3_DEFAULT_JOINT_POS)
     policy_joints = SceneEntityCfg(
@@ -125,9 +140,9 @@ def multi_motion_env_cfg(
     )
     observations = {
         "proprio": ObservationGroupCfg(
-            terms=_proprio_terms(noisy=not play),
+            terms=_proprio_terms(noisy=dr_cfg.observation_noise),
             concatenate_terms=True,
-            enable_corruption=not play,
+            enable_corruption=dr_cfg.observation_noise,
             history_length=4,
             flatten_history_dim=True,
             nan_policy="sanitize",
@@ -151,8 +166,10 @@ def multi_motion_env_cfg(
     for group in observations.values():
         for term in group.terms.values():
             term.clip = (-100.0, 100.0)
+    observations["proprio"].terms["joint_pos"].params["biased"] = bool(dr_cfg.encoder_bias)
 
-    return ManagerBasedRlEnvCfg(
+    return MultiMotionEnvCfg(
+        randomization=dr_cfg,
         scene=SceneCfg(
             terrain=TerrainEntityCfg(terrain_type="plane"),
             num_envs=num_envs if num_envs is not None else (16 if play else 4096),
@@ -167,6 +184,7 @@ def multi_motion_env_cfg(
                 scale=A3_ACTION_SCALE,
                 preserve_order=True,
                 use_default_offset=True,
+                delay_steps=dr_cfg.delay_steps,
             )
         },
         commands={
@@ -176,13 +194,13 @@ def multi_motion_env_cfg(
                 future_steps=FUTURE_STEPS,
                 reset_phase="start" if play else "uniform",
                 shard_across_ranks=shard_across_ranks,
-                joint_position_noise=0.0 if play else 0.05,
-                joint_velocity_noise=0.0 if play else 0.20,
-                root_position_noise=(0.0, 0.0, 0.0) if play else (0.03, 0.03, 0.01),
-                root_velocity_noise=(0.0, 0.0, 0.0) if play else (0.10, 0.10, 0.05),
+                joint_position_noise=0.05 if dr_cfg.reset_noise else 0.0,
+                joint_velocity_noise=0.20 if dr_cfg.reset_noise else 0.0,
+                root_position_noise=(0.03, 0.03, 0.01) if dr_cfg.reset_noise else (0., 0., 0.),
+                root_velocity_noise=(0.10, 0.10, 0.05) if dr_cfg.reset_noise else (0., 0., 0.),
             )
         },
-        events={},
+        events=randomization_events(dr_cfg),
         rewards={
             "tracking/joint_pos": RewardTermCfg(
                 func=mdp.joint_position_exp,
@@ -289,6 +307,7 @@ def multi_motion_runner_cfg() -> BeyondAmpOnPolicyRunnerCfg:
         clip_actions=5.0,
         use_agent_reward_groups=False,
         actor=BeyondAmpModelCfg(
+            class_name="MLPModel",
             hidden_dims=(512, 512, 256),
             activation="elu",
             obs_normalization=True,
@@ -299,6 +318,7 @@ def multi_motion_runner_cfg() -> BeyondAmpOnPolicyRunnerCfg:
             },
         ),
         critic=BeyondAmpModelCfg(
+            class_name="MLPModel",
             hidden_dims=(512, 512, 256),
             activation="elu",
             obs_normalization=True,

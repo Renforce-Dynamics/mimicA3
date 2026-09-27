@@ -58,6 +58,7 @@ Single-GPU smoke run:
 ```bash
 uv run train-mimica3 MimicA3-MultiMotion-Tracking-v1 \
   --gpu-ids '[0]' \
+  --dr-profile basic_dr \
   --env.scene.num-envs 256 \
   --agent.max-iterations 10
 ```
@@ -74,11 +75,16 @@ scripts/train_multigpu.sh 0,1,2,3 \
 (`global_reference_id % WORLD_SIZE == RANK`), and PPO syncs parameters and gradients
 over NCCL. Drop to 2048 envs per GPU if you run out of memory.
 
-To train an expert on your own clips, convert them to the `mimica3.motion.v1` format
-(offline, see [docs/MOTION_FORMAT.md](docs/MOTION_FORMAT.md)) and add a dataset entry
-with an explicit weight in `configs/a3_multi_motion.yaml`. Dataset weights are
-configured by hand on purpose: a large corpus should not silently swallow a small
-task-specific one.
+DR is selectable with `--dr-profile`: `no_dr`, `basic_dr` (default), `full_dr`,
+`sonic_dr`, or `full_plus_sonic_dr`. All profiles use one whole-body MLP actor and
+the existing PPO value critic. See the [DR configuration table](docs/DR_TABLE.md)
+for parameter ranges and composition rules.
+
+Custom motion tooling uses the `mimica3.motion.v1` format and explicit dataset
+weights (see [docs/MOTION_FORMAT.md](docs/MOTION_FORMAT.md)). The current training
+command loads a FullCover-format bank through `--env.commands.motion.bank-file`.
+`configs/a3_multi_motion.yaml` is a contract summary, not an automatically loaded
+dataset mixing configuration.
 
 ## Notes
 
